@@ -1,0 +1,12 @@
+属性驱动：
+    1、目的：在action中声明一些属性，这些属性能够获取到表单中的值
+    2、步骤：
+         1、在action中声明一些属性，属性的名称和页面上name属性的名称一致
+         2、这些属性在action中必须有setter和getter方法
+    3、原理：
+         	在浏览器提交一个url请求时，先创建一个action,并且把action放入到对象栈中，这个时候
+         	action的属性会出现在对象栈中，然后经过一个拦截器ParametersInterceptor拦截器
+         	    做的事情：
+         	       1、获取页面上表单中的name和value的值
+         	       2、把上述的name和value的值封装成一个map
+         	       3、根据valueStack.setValue(name,value);来把页面上的值设置到对象栈的name属性中

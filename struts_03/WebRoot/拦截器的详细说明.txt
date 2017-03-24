@@ -1,0 +1,55 @@
+拦截器的意义在于：可以把一些和业务逻辑没有关系的代码放入到拦截器中，做到这些代码和业务逻辑的松耦合
+
+概念：
+    1、拦截器：实质上是一个类，实现了Interceptor接口的一个类
+    2、拦截器栈：把很多个拦截器集中在一起就是拦截器栈
+    3、struts2有一个默认的拦截器栈，该栈在struts-default.xml文件中的struts-default包中
+    	结构为：
+    	    <package name="struts-default">
+    	    	<interceptors>
+    	    	    //声明一个拦截器
+    	    	    <interceptor name="exception" class="com.opensymphony.xwork2.interceptor.ExceptionMappingInterceptor"/>
+    	    		//声明一个拦截器栈
+    	    		<interceptor-stack name="defaultStack">
+    	    		    //引用上面声明的拦截器
+		                <interceptor-ref name="exception"/>
+		                <interceptor-ref name="alias"/>
+		                <interceptor-ref name="servletConfig"/>
+		                <interceptor-ref name="i18n"/>
+		                <interceptor-ref name="prepare"/>
+		                <interceptor-ref name="chain"/>
+		                <interceptor-ref name="debugging"/>
+		                <interceptor-ref name="scopedModelDriven"/>
+		                <interceptor-ref name="modelDriven"/>
+		                <interceptor-ref name="fileUpload"/>
+		                <interceptor-ref name="checkbox"/>
+		                <interceptor-ref name="multiselect"/>
+		                <interceptor-ref name="staticParams"/>
+		                <interceptor-ref name="actionMappingParams"/>
+		                <interceptor-ref name="params">
+		                  <param name="excludeParams">dojo\..*,^struts\..*</param>
+		                </interceptor-ref>
+		                <interceptor-ref name="conversionError"/>
+		                <interceptor-ref name="validation">
+		                    <param name="excludeMethods">input,back,cancel,browse</param>
+		                </interceptor-ref>
+		                <interceptor-ref name="workflow">
+		                    <param name="excludeMethods">input,back,cancel,browse</param>
+		                </interceptor-ref>
+		            </interceptor-stack>
+    	    	</interceptors>
+    	    	//让struts2内部执行默认的拦截器栈或者拦截器
+    	    	<default-interceptor-ref name="defaultStack"/>
+    	    </package>
+       4、拦截器的执行顺序：
+            	按照拦截器栈从上到下执行，执行完拦截器以后，再执行action,例如:
+            	  <interceptor-stack name="privilegeStack">
+					<interceptor-ref name="defaultStack"></interceptor-ref>
+					<interceptor-ref name="privilege"></interceptor-ref>
+				  </interceptor-stack>
+				 先执行默认的拦截器栈，后执行privilege
+				 <interceptor-stack name="privilegeStack">
+					<interceptor-ref name="privilege"></interceptor-ref>
+					<interceptor-ref name="defaultStack"></interceptor-ref>
+				  </interceptor-stack>
+				  先执行privilege,后执行默认的拦截器栈

@@ -1,0 +1,58 @@
+1、在页面上可以写struts2的标签，但是浏览器是不识别struts2标签的
+2、当在页面上写完struts2标签的时候，struts2内核会对标签进行翻译成html标签，在翻译的过程中会多增加很多内容
+			<s:form action="">
+	    		<s:textfield name="username" value="111"></s:textfield>
+	    	</s:form>
+	    	
+	    	翻译成html:
+	    	<table class="wwFormTable">
+				<tbody>
+					<tr>
+						<td class="tdLabel"></td>
+					<td>
+						<input id="_username" type="text" value="111" name="username">
+					</td>
+					</tr>
+				</tbody>
+			</table>
+3、修改方案：
+          在服务器启动的时候，struts2内部会去org/apache/struts2下面加载一个properties文件：default.properties文件
+          一些参数的说明：
+          struts.i18n.encoding=UTF-8  默认的编码
+          struts.action.extension=action,,  默认的扩展名
+          struts.devMode = false   开发模式  
+          	默认值为false   改了配置文件以后必须重新启动
+          	值为true       改了配置文件以后，struts2内部会自动检查，重新加载
+          struts.ui.theme=xhtml  ui的主题 
+            	可以把xhtml的值改成
+4、改变default.properties文件中的配置
+        在xml文件中，有一个元素为constant,为常量元素，该元素的作用就是为了改变default.properties文件中的值
+          <constant name="struts.devMode" value="true"/>    开发模式
+          <constant name="struts.ui.theme" value="simple"/>  简单样式
+          
+5、两个比较重要的标签
+      s:select
+          value属性    指向集合的位置
+          listKey   option中的value
+          listValue  option标签的内容
+          headerKey  第一个option的value
+          headerValue  第一个option的内容
+      s:checkboxlist
+      	  	属性同上
+      	  	必须有name属性
+6、ui标签的好处：
+     1、在页面上如果使用struts2的ui标签，不用再写过滤器进行编码的处理
+     2、使用struts2的ui标签对于数据的回显示很方便的
+     3、一般情况下，在页面上需要对数据进行回显，则数据放在对象栈中
+     		ActionContext.getContext().getValueStack().push(person1);
+     4、页面上可以根据struts2标签中的name属性进行回显
+           <s:textfield name="name"></s:textfield>
+     5、如果把数据放入到了map栈中，则页面上必须根据value进行回显
+     6、在s:form标签的各种元素中：
+           s:textfield
+           s:textarea
+           s:password
+           ....
+           	如果要想用value属性进行回显，也就是说value属性内容要跟ognl表达式
+           	    value="%{ognl表达式}"
+          

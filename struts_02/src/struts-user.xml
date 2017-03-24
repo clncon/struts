@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+    <constant name="struts.enable.DynamicMethodInvocation" value="true" />
+    <constant name="struts.devMode" value="true" />
+
+      <package name="UserAction" namespace="/" extends="struts-default">
+         <action name="UserAction_*" method="{1}" class="cn.itcast.struts_02.actions.UserAction">
+            <result name = "m1" type="dispatcher">dispathcher.jsp</result>
+            <result name = "m2" type="redirect">redirect.jsp</result>
+            <result name = "m3" type="redirectAction">UserAction_updateUser</result>
+         </action>
+      </package>
+    
+  
+</struts>

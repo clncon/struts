@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+             
+       <package name="Interceptor" namespace="/" extends="struts-default">
+            <interceptors>
+               <!-- 声明一个拦截器 -->
+                <interceptor name="privilege" class="cn.itcast.struts.interceptor.PrivilegeInterceptor"></interceptor>
+                  <!-- 声明一个拦截器栈 -->
+                   <interceptor-stack name="privilegeStack">
+                      <!-- 
+                                                                                         引用默认的拦截器栈，防止struts-defautl中拦截器被覆盖
+                       -->
+                      <interceptor-ref name="defaultStack"></interceptor-ref>
+                      <!-- 
+                                                                                      引用自己创建的拦截器
+                        -->
+                       <interceptor-ref name="privilege"></interceptor-ref>
+                   </interceptor-stack>
+            </interceptors>
+             <default-interceptor-ref name="privilegeStack"></default-interceptor-ref>
+             <action name="InterceptorAction_*" method="{1}" class="cn.itcast.struts.actions.InterceptorAction">
+                  <result name="interceptor_privilege">interceptor_privilege.jsp</result>
+             </action>
+       </package>
+</struts>

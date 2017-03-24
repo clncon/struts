@@ -1,0 +1,55 @@
+1、作用
+     就是把valueStack中的数据显示到页面上
+2、struts2的标签
+   1、引入标签库
+   		<%@ taglib prefix="s" uri="/struts-tags" %>
+   		标签库的位置在struts2-core-2.3.1.2.jar包中的META-INF/struts-tags.tld
+   2、s:debug
+        	是一个超级链接，当点击该超级链接的时候，valueStack中的内容显示出来了
+   3、访问valueStack中的数据
+       1、如果要访问map栈中的数据，加"#"
+       2、如果要访问对象栈中的数据，直接访问属性即可
+   4、s:property标签
+                     说明:
+          1、是一个输出标签
+          2、如果不写value属性，输出栈顶的元素
+          3、如果执行了下面的代码
+          		Person person = new Person();
+				person.setPid(1L);
+				person.setName("王二麻子");
+				//把person对象放入到了栈顶
+				ActionContext.getContext().getValueStack().push(person);
+		               把对象放入到栈顶，其属性会直接暴漏出来，在页面上可以直接访问其属性
+		        <s:property value="name"/>
+		        	其页面上的对象栈中的属性的名称来自于方法
+		  4、如果一个对象在对象栈中,那么该对象如果有set或者get方法，例如：
+		       getAaa(){
+		         return "xxx";
+		       }
+		       	那么aaa会作为属性的名称,xxx会作为属性的值保存在对象栈中
+		  5、如果对象栈中出现相同的属性,则会从上向下找,直到找到就停止了
+		  6、如果把一个对象放入到request域中
+		       ServletActionContext.getRequest().setAttribute("person", person);
+		       	页面上可以
+		        <s:property value="#request.person.name"/>
+		        <s:property value="#request.person.getName()"/>
+		  7、如果把一个对象放入到各种域中
+		  		ServletActionContext.getServletContext().setAttribute("a_app", "a_app");
+		  		在页面上可以利用
+		  		   <s:property value="#attr.a_app"/>从各种域中查找相应的key值
+		  8、可以利用parameters输出表单中的内容
+		  		<s:property value="#parameters.a[0]"/>
+   5、s:iterator标签
+        1、当value属性不写，则默认迭代栈顶的元素
+        2、value属性指向了要迭代的集合List,Set,Map,[]
+        3、当前正在迭代的元素在栈顶
+        4、var属性的值表示正在遍历的元素，该值在map栈中
+        5、status属性表示正在遍历的那一行的状态
+            int getCount() 返回当前迭代的元素个数
+			int getIndex() 返回当前迭代元素的索引
+			boolean isEven() 返回当前迭代元素的索引是否是偶数
+			boolean isOdd()  返回当前迭代元素的索引是否是奇数
+			boolean isFirst()  返回当前迭代元素是否为第一个元素
+			boolean isLast()  返回当前迭代元素是否为最后一个元素
+	    6、使行变色
+             

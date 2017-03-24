@@ -1,0 +1,28 @@
+struts2与json的整合
+	1、步骤
+		1、导入jar包
+			struts2-json-plugin-2.1.8.1
+			该jar包的根目录有一个struts-plugin.xml文件
+					<package name="json-default" extends="struts-default">
+						<result-types>
+						    <result-type name="json" class="org.apache.struts2.json.JSONResult"/>
+						</result-types>
+						<interceptors>
+						    <interceptor name="json" class="org.apache.struts2.json.JSONInterceptor"/>
+						</interceptors>
+					</package>
+			从该配置文件可以看出：
+				1、自定义了一个结果集json-default
+				2、有一个拦截器json
+		2、在struts2的配置文件中
+			<result type="json"></result>
+			注意：
+				1、结果集的类型是json
+				2、因为是ajax请求，所以不需要返回任何页面，所以result中间没有内容
+		3、在action中，声明一个属性，该属性有get方法，属性有返回值，例如：
+			 public String getXxx(){
+				return "aaa";
+			 }
+			 那么将以如下的值返回到客户端:'xxx':'aaa'
+		4、在action中，如果不需要返回客户端值，那么方法最好别以get方法开头
+		5、在客户端就能接收到服务器端返回的数据

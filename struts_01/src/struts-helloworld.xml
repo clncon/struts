@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+      
+     <!--   
+                       关于命名空间
+    <package name="helloworld" namespace="/base" extends="struts-default">
+         <action name="helloworldAction" class="cn.itcast.struts2.hello_world.helloworldAction">
+             <result name="index">index.jsp</result>
+         </action>
+      </package> -->
+       <!-- 演示extends的功能 -->
+        <!-- 这个让aa继承了helloworld对象的全部功能 -->
+          <!-- struts.xml会覆盖 struts-default.xml中的相同文件-->
+        <!-- <bean type="com.opensymphony.xwork2.util.reflection.ReflectionProvider" name="struts"
+         class="com.opensymphony.xwork2.ognl.OgnlReflection" /> -->
+      <package name="helloworld" namespace="/" extends="struts-default">
+         <action name="helloworldAction" class="cn.itcast.struts2.hello_world.helloworldAction">
+             <result name="index">index.jsp</result>
+         </action>
+        
+             <action name="helloworldAction2" class="cn.itcast.struts2.actions.helloworldAction2">
+                   <result>index.jsp</result>
+            </action>
+              <!-- 如果没有写class的话默认走父类的execute方法 -->
+            <action name="helloworldAction3">
+                <result>index.jsp</result>
+            </action>
+      </package>
+      <!-- <package name="aa" namespace="/world" extends="helloworld">
+        
+      </package> -->
+       
+</struts>

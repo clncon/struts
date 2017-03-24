@@ -1,0 +1,73 @@
+ 
+
+           package:其功能是用来管理action的，一般情况下package是针对模块
+                                                                    划分的name为 package的名称 是唯一的 
+                                                                    
+           extends="struts-default" 实际上是把package中的name为"struts-default"的
+                                                                   的包中的所有的功能继承过来了，所以extends的作用就是继承指定的包中的内容
+                                                                   
+           namespace:和url有关
+                                                                            如果namespace为"/" 
+                                                                                              那么在url中项目名称后面紧跟着action中的name
+                      namespace="/"
+                       http://localhost:8088/itcastsh08_struts2_package_namespace/helloWorldAction.action
+                  3、如果namespace为"/base"
+                        http://localhost:8088/itcastsh08_struts2_package_namespace/base/helloWorldAction.action
+                  4、如果namespace为"/base"
+                         itcastsh08_struts2_package_namespace/helloWorldAction.action  
+            	                                该url是请求不到的
+                          itcastsh08_struts2_package_namespace/base/helloWorldAction.action
+               	                                 该url可以请求到
+                          itcastsh08_struts2_package_namespace/base/a/helloWorldAction.action
+                                                                                           也可以请求到 ，查找规则：
+                             1、先找base/a下的helloWorldAction
+                             2、再查找base下的helloWorldAction
+                 5、在url中加了几层命名空间，则在转向到jsp页面时，jsp的路径也会加几个命名空间的名字的路径
+                           base/a/helloWorldAction.action
+                           base/a/b/index.jsp
+                 6、如果采用上述的命名空间的形式，命名空间有什么的名称，在webroot下就应该建立什么样的文件夹
+          	
+          	
+1、这两个配置文件都是在服务器启动的时候加载的
+2、这两个配置文件都放在了classpath的根目录
+     struts.xml文件放在了src的根目录
+     struts-default.xml文件是在struts2核心包的根目录下
+3、struts.xml文件是供程序员使用的
+   struts-default.xml文件是运行struts2低层的xml文件
+4、先加载struts-default.xml文件，后加载struts.xml文件
+5、因为dtd都一样，如果出现相同的元素，后者覆盖前者
+
+该例子中:
+    在struts-default.xml文件中有这样的配置：
+    <bean type="com.opensymphony.xwork2.util.ValueStackFactory" 
+    	name="struts" 
+    	class="com.opensymphony.xwork2.ognl.OgnlValueStackFactory"/>
+ 在struts.xml文件中，
+ 	<bean type="com.opensymphony.xwork2.util.ValueStackFactory" 
+		name="struts" 
+		class="com.opensymphony.xwork2.ognl.OgnlValueStackFactor" />
+	根据type来看，这两个配置是一样的，所以后者覆盖前者，所以报错
+		找不到OgnlValueStackFactor	
+		
+		
+		
+		
+		
+struts2的结果集:
+   1、步骤：
+       1、action类中的方法必须返回一个字符串
+       2、返回的字符串要和struts的配置文件中的result标签中的name属性的名称对应
+   2、result标签中有两个特别重要的属性：
+        name:和action方法的返回值对应   可以省略  默认值为"success"
+        type:为结果集的类型    可以省略  默认值为转发
+           	在struts-default.xml文件中	
+           		<result-type 结果集类型
+           			name="dispatcher" 
+           			class="org.apache.struts2.dispatcher.ServletDispatcherResult" 
+           			default="true"  如果在result标签中不写type属性的值，则默认为dispatcher
+           			/>
+   3、例子
+         <action name="helloWorldAction" class="cn.itcast.sh08.struts2.action.HelloWorldAction">
+			<result name="index">index.jsp</result>
+		</action>
+		因为在result标签中没有写type，所以采用默认值：转发		

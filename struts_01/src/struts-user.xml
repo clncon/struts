@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+     <!-- 
+                                                当使用下面的方式来调用业务方法时，请加上以下的代码
+	         <constant name="struts.enable.DynamicMethodInvocation" value="true" /> 
+            http://localhost:8088/itcastsh08_struts2_methodpattern/m2/userAction!deleteUser.action                                  
+       -->
+	 <constant name="struts.enable.DynamicMethodInvocation" value="true" /> 
+     <!-- 使用method方法 -->
+	<package name="method1" namespace="/m1" extends="struts-default">
+	   <action name="userAction" method="SaveUser" class="cn.itcast.struts2.methodpattern.UserAction">
+	           <result>index.jsp</result>
+	   </action>
+	</package>
+	  
+	  <!-- 使用   http://localhost:8088/itcastsh08_struts2_methodpattern/m2/userAction!deleteUser.action
+	                      方法来调用映射方法-->
+	<package name="method2" namespace="/m2" extends="struts-default">
+	   <action name="userAction" class="cn.itcast.struts2.methodpattern.UserAction">
+	           <result>index.jsp</result>
+	   </action>
+	</package>
+	 <!-- 第三种方式 -->
+	<package name="method3" namespace="/m3" extends="struts-default">
+	   <action name="*_add" method="SaveUser" class="cn.itcast.struts2.methodpattern.UserAction">
+	           <result>index.jsp</result>
+	   </action>
+	</package>
+	<package name="method4" namespace="/m4" extends="struts-default">
+	    <!-- 通配符通配同一个类的所有的方法 -->
+	   <action name="*_add" method="{1}" class="cn.itcast.struts2.methodpattern.UserAction">
+	           <result>index.jsp</result>
+	   </action>
+	</package>
+	 <!-- 通配符通配所有类的同一个方法名的方法 -->
+	<package name="method5" namespace="/m5" extends="struts-default">
+	   <action name="*_pattern" method="pattern" class="cn.itcast.struts2.methodpattern.{1}">
+	           <result>index.jsp</result>
+	   </action>
+	</package>
+	  <!-- 通配符通配同一个类的所有的方法,并返回到对应的方法的页面 -->
+	<package name="method6" namespace="/m6" extends="struts-default">
+	   <action name="UserAction_*" method="{1}" class="cn.itcast.struts2.methodpattern.UserAction">
+	           <result>{1}.jsp</result>
+	   </action>
+	</package>
+	<package name="method7" namespace="/m7" extends="struts-default">
+	   <action name="*_*" method="{2}" class="cn.itcast.struts2.methodpattern.{1}">
+	           <result>{2}.jsp</result>
+	   </action>
+	</package>
+</struts>

@@ -1,0 +1,6 @@
+dispatcher
+			<result name="m1">/dispatcher.jsp</result>
+redirect:
+             <result name="m2" type="redirect">/redirect.jsp</result>
+redirectAction:从action跳转到action
+             <result name="m3" type="redirectAction">userAction_deleteUser.action</result>

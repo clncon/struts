@@ -1,0 +1,55 @@
+关于url映射action中方法的说明：
+   1、第一种情况
+       url:
+          http://localhost:8088/itcastsh08_struts2_action/helloWorldAction.action
+                     配置文件：
+          <package name="helloworld" namespace="/" extends="struts-default">
+			<action name="helloWorldAction" class="cn.itcast.sh08.struts2.action.HelloWorldAction">
+				<result name="index">index.jsp</result>
+			</action>
+		  </package>
+	         如果采用该结构，只能执行helloWorldAction中的execute方法
+   2、第二种情况
+       	在配置文件的action标签中可以指定method属性
+       	<action name="userAction" method="saveUser" 
+       		class="cn.itcast.sh08.struts2.action.UserAction">
+			<result>index.jsp</result>
+		</action>
+		url:http://localhost:8088/itcastsh08_struts2_methodpattern/userAction.action
+		这个时候,将请求userAction中method属性的值指定的方法:saveUser
+	   缺点:
+	           如果在UserAction中出现很多个方法，因为每一个方法配置一个action,所以有几个方法就得配置几个action
+   3、第三种情况
+        <package name="method2" namespace="/m2" extends="struts-default">
+			<action name="userAction" class="cn.itcast.sh08.struts2.action.UserAction">
+				<result>index.jsp</result>
+			</action>
+		</package>
+		url:
+			http://localhost:8088/itcastsh08_struts2_methodpattern/m2/userAction!deleteUser.action
+		UserAction中的其中的一个方法和userAction!deleteUser中的叹号后面的内容一样
+		为动态调用该方法
+	4、请求UserAction中的saveUser方法:
+	    	要求：a_add.action,b_add.action,c_add.action都可以请求
+	5、配置文件
+		<action name="*_add" method="{1}" class="cn.itcast.sh08.struts2.action.UserAction">
+			<result>index.jsp</result>
+		</action>
+	6、请求UserAction和PersonAction中的pattern方法
+	    <action name="*_pattern" method="pattern" class="cn.itcast.sh08.struts2.action.{1}">
+			<result>index.jsp</result>
+		</action>
+	7、配置文件中
+	    <package name="method6" namespace="/" extends="struts-default">
+			<action name="UserAction_*" method="{1}" class="cn.itcast.sh08.struts2.action.UserAction">
+				<result>{1}.jsp</result>
+			</action>
+		</package>
+	8、配置文件中
+	    <action name="*_*" method="{2}" class="cn.itcast.sh08.struts2.action.{1}">
+			<result>{2}.jsp</result>
+		</action>
+		
+		统配的程度越高，匹配的范围越大，越容易出问题
+	    
+	    

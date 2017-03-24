@@ -1,0 +1,32 @@
+1、在UploadAction中写一个方法download
+     public String download() throws Exception{
+		/**
+		 * 要下载的文件的名称
+		 */
+		String fileName = ServletActionContext.getRequest().getSession().getAttribute("fileName").toString();
+		/**
+		 * 要下载的文件的路径
+		 */
+		String filePath = ServletActionContext.getRequest().getSession().getAttribute("filePath").toString();
+		fileName = URLEncoder.encode(fileName, "utf-8");
+		ActionContext.getContext().put("fileName", fileName);
+		this.inputStream = new FileInputStream(new File(filePath));
+		return "download";
+	}
+2、在UploadAction中准备一个属性inputStream,将来把输入流流向浏览器中
+3、在配置文件中
+			result name="download" type="stream">
+				<!-- 
+					输入流的名字
+					   用来获取inputStream
+				-->
+				<param name="inputName">inputStream</param>
+				<!-- 名称的名字 -->
+				<param name="contentDisposition">
+					<!-- 
+						应用ognl表达式动态显示要下载的文件的名字
+					-->
+					attachment;filename="${#fileName}"   fileName来自于map栈中
+				</param>
+			</result>
+4、写一个UploadUitls类完成文件上传

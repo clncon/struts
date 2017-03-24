@@ -1,0 +1,31 @@
+action的写法
+   1、就是一个最简单的javabean
+   		public class HelloWorldAction {
+			public String execute(){
+				System.out.println("hello world");
+				return "index";
+			}
+		}
+   2、让一个action实现接口Action
+   		public class HelloWorld2Action implements Action{
+			/**
+			 * 如果实现了Action接口，应该把方法写在execute里
+			 */
+			public String execute(){
+				System.out.println("hello world");
+				return SUCCESS;
+			}
+		}
+		<result>index.jsp</result>
+	3、让一个类继承ActionSupport
+		ActionSupport中含有一些功能:
+		   1、国际化
+		   2、表单验证
+		如果让一个action类继承了ActionSupport就能直接使用ActionSupport中的国际化、表单验证等功能
+	4、如果在action的配置中这样配置：
+	     <action name="helloWorld3Action">
+			<result>index.jsp</result>
+		</action>
+		那么在struts-default.xml文件中有一句话将起作用：
+		   <default-class-ref class="com.opensymphony.xwork2.ActionSupport" />
+	    这个时候将执行ActionSupport中的execute方法

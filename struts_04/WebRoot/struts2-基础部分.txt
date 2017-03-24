@@ -1,0 +1,398 @@
+1、struts2是一个mvc框架，是struts1与xwork的结合体
+2、struts2的配置文件
+	1、文件类型
+		最常用的配置文件有
+			default.properties
+				struts.i18n.encoding=UTF-8		设置默认的编码字符集
+				struts.multipart.maxSize=2097152	默认文件上传的大小
+				struts.action.extension=action          默认的扩展名
+				struts.devMode = false                  是否是开发模式
+				struts.ui.theme = simple			配置struts2的简单样式
+				struts.custom.i18n.resources            自定义资源文件
+			struts-default.xml
+				bean的配置用于静态注入
+				package
+					resulttype
+					interceptor
+			struts-plugin.xml
+				
+			struts.xml
+				用户最常用的配置文件
+	2、详细描述
+		1、配置文件中package的机制
+			1、继承
+				在配置文件中，package元素有一个属性为name,name的值是唯一的，是包的名称
+				现在有如下的配置
+					<package name="a" extends="struts-default">
+					</package>
+					<package name="b" extends="a"></package>
+				这样包b中就有了包a的内容
+				所以这样也可以推出：
+					包a拥有struts-default包中的内容
+			2、命名空间
+				在package中有一个属性为namespace
+				<package name="c" namespace="/user" extends="struts-default">
+					<action name="userAction_*">
+				</package>
+				这个时候在浏览器发出的请求：
+					http://localhost:8080/struts2/user/userAction_a.action可以找到action
+					http://localhost:8080/struts2/user/a/b/userAction_b.action可以找到action
+					http://localhost:8080/struts2/userAction_c.action不能够找到action
+				struts2容器在找action时，会采用这样的策略：
+					第一个URL正好和命名空间匹配，所以能够找到
+					第二个URL，当查找user/a/b时，并没有找到相应的action,则会查找user/a,如果找不到则会找user,这样就能找到了
+					第三个URL,当查找userAction时，并没有找到，因为userAction最低层的路径是user
+		2、action的配置
+			在action中，可以采用通配符的配置方式进行
+				<action name="userAction_*" method="{1}" class=".....UserAction">
+				<action name="*_*" method="{2}" class="cn.ithema03.struts.{1}">
+		3、result的配置
+			1、每一个result代表一个结果集，result中属性name的值和action中方法的返回值保持一致
+			2、struts2中最常用的结果集是dispatcher，redirect，redirectAction(见struts-default.xml内容)
+			3、result元素中type属性的值为结果集类型
+		4、在action的配置中，class属性可以不写，如果不写默认执行ActionSupport中execute中的内容，从struts-default.xml文件中可以看出
+			 <default-class-ref class="com.opensymphony.xwork2.ActionSupport" />
+		5、拦截器的配置
+			1、interceptor只能配置在package中，所以不能配置全局的拦截器
+			2、struts2中关于interceptor有两个概念：interceptor,interceptors
+			   这两个内容的声明都放在interceptors标签中
+				<interceptors>
+					//声明一个interceptor
+					<interceptor name="imageInterceptor" class="cn.itheima03.struts2.interceptor.MyInterceptor"></interceptor>
+					//声明一个interceptor stack
+					<interceptor-stack name="myInterceptor">
+						//自定义的interceptor
+						<interceptor-ref name="imageInterceptor"></interceptor-ref>
+						//struts2默认的执行的interceptor stack
+						<interceptor-ref name="defaultStack"></interceptor-ref>
+					</interceptor-stack>
+				</interceptors>
+				//引用myInterceptor的interceptor stack
+				<default-interceptor-ref name="myInterceptor"></default-interceptor-ref>
+			3、从上述的配置可以说明：
+				1、在struts2内部有默认的执行的interceptor stack
+					<default-interceptor-ref name="defaultStack"/>
+				   如果一个interceptor不在这个interceptor stack中，那么将不执行该interceptor
+				2、可以把默认的interceptor stack变成自己的interceptor stack
+				3、在interceptor stack中可以指向(ref)一个interceptor,也可以指向(ref)一个interceptor stack
+			4、如果一个package要用到另外一个package中的interceptor,只需要通过package的继承机制就可以了
+3、属性驱动
+	1、概念
+		可以利用属性驱动获取页面表单元素的内容
+	2、步骤
+		1、在action中声明属性，属性的名称和页面元素中name属性的值保持一致
+		2、action中的属性必须有set和get方法
+4、模型驱动
+	1、如果页面上元素内容太多，用属性驱动实现，action中代码就会很庞大，这个时候可以考虑用模型驱动来实现
+	2、步骤
+		1、action实现一个接口ModelDriver
+		2、在action中声明一个属性，该属性会封装页面中的数据，并且用new的方法给该属性创建对象
+		3、填充接口中的方法getModel,返回该属性的值
+
+		public class UserAction implements ModelDriver<User>{
+			private User model = new User();
+			public User getModel(){
+				return this.model;
+			}
+		}
+
+5、关于action的说明
+	1、action是多实例的
+	2、action的方法如果以get开头，会带来安全性的隐患
+6、valueStack
+	1、valueStack是struts2中存放数据的一种数据结构
+	2、valueStack分为两种内存结构：对象栈、map栈
+	3、可以通过以下几种方法获取valueStack
+		1、ValueStack valueStack = ActionContext.getContext().getValueStack();
+		2、ValueStack valueStack2 = ServletActionContext.getValueStack(ServletActionContext.getRequest());
+		3、ValueStack valueStack3 = (ValueStack)ServletActionContext.getRequest().getAttribute("struts.valueStack");
+	   以上三种方法获取的valueStack都是同一个对象
+	4、对map栈的操作
+		1、request,response,parameters,application等都在map栈中，分别的数据结构为
+			{"request",RequestMap} {"session",SessionMap} {"application",ApplicationMap}
+		2、可以通过如下方法把数据存放在request,session,application域中
+			ServletActionContext.getRequest().setAttribute("msg_request", "msg_request");
+			ServletActionContext.getServletContext().setAttribute("msg_application", "msg_application");
+			ServletActionContext.getRequest().getSession().setAttribute("msg_session", "msg_session");
+		3、可以通过如下方法吧数据直接存放在map栈中
+			ActionContext.getContext().put("aaaa", "aaaaa");
+			valueStack.getContext().put("bbb", "bbb");
+	5、对对象栈的操作
+		1、把一个数据存放在对象栈的尾部
+			valueStack.getRoot().add("aaaaa");
+		2、把一个数据存放在对象栈的栈顶
+			valueStack.getRoot().add(0,"adsf");
+			valueStack.push("rtrt");
+		3、把一个数据封装成map,把map放入到栈顶
+			valueStack.set("aaasdf", "asfd");
+		4、获取对象栈栈顶的元素
+			valueStack.peek();
+			valueStack.getRoot().get(0);
+		5、移除对象栈栈顶的元素
+			valueStack.getRoot().remove(0);
+			valueStack.pop();
+7、ognl表达式
+	1、把一个数据放入到valueStack中，在页面上可以利用ognl表达式把该数据提取出来
+	2、ognl表达式总体的规则：如果一个数据存放在map栈中，则加#访问，如果一个数据在对象栈中，则不用加#访问
+	3、详细说明
+		1、s:property标签
+			1、如果没有value属性，则默认输出对象栈的栈顶的元素
+			2、<s:property value="#session.aa">输出map栈中session域中aa的值
+		2、s:iterator标签
+			1、迭代遍历集合
+				1、集合的类型：List,Set,Map,Object[]
+				2、value属性的值能直接跟ognl表达式
+				3、当前正在迭代的元素在栈顶存放
+				4、要熟练使用该标签迭代二重或者三重集合
+			2、属性var="a"表示当前正在迭代的元素在map栈中存放一份，key值为"a"
+			3、当迭代map的时候，当前正在迭代的元素是Entry
+				<s:iterator value="#map">
+					<s:property value="key"/>,<s:property value="value.pid"/>
+					<s:property value="key"/>,<s:property value="value.username"/>	
+				 </s:iterator>
+			4、属性status，代表当前迭代元素的一些性质
+				int getCount() 返回当前迭代的元素个数
+				int getIndex() 返回当前迭代元素的索引
+				boolean isEven() 返回当前迭代元素的索引是否是偶数
+				boolean isOdd()  返回当前迭代元素的索引是否是奇数
+				boolean isFirst()  返回当前迭代元素是否为第一个元素
+				boolean isLast()  返回当前迭代元素是否为最后一个元素
+		3、s:debug标签可以输出valueStack的内存快照
+8、struts2的校验机制
+	struts2提供了两种校验机制
+		代码校验
+			步骤：
+				1、在页面上
+					<s:textfield name="username" label="用户名"></s:textfield>
+    					<s:textfield name="password" label="密码"></s:textfield>
+    					<s:fielderror fieldName="username"></s:fielderror>
+					
+					说明：
+						<s:fielderror fieldName="username"></s:fielderror>
+						在这里fileldName="username"会把后台username的报错信息显示到前台
+						<s:fielderror></s:fielderror>
+						把所有的字段的错误信息显示到前台的页面中
+				2、在action中(action必须继承ActionSupport类，该类实现了Validateable接口)，可以有两种写法
+					1、重写validate方法就可以了
+						public void validate() {
+							/**
+							 * 验证用户名和密码是否为空
+							 */
+							if("".equals(this.getUsername())){
+								this.addFieldError("username", "用户名不能为空");
+							}
+							if("".equals(this.getPassword())){
+								this.addFieldError("password", "密码不能为空");
+							}
+						}
+					2、如果action中的几个方法都需要校验，在action中必须写这样的方法
+						例如：对如下方法进行校验
+							public String testValidate(){
+							
+							}
+							那么校验方法为：(validate+被校验的方法名称(方法的第一个字母大写))
+							public void validateTestValidate(){
+								//校验逻辑
+							}
+				    说明：
+					this.addFieldError("username", "用户名不能为空");该方法中username和页面上的fieldName字段对应，而value的值就是报错信息
+				3、在struts2的配置文件中
+					如果校验没有通过，则指向input所指向的页面
+					<result name="input">validate/validate.jsp</result>
+					而在这个页面中，<s:fielderror fieldName="username"></s:fielderror>该标签将显示
+						this.addFieldError("username", "用户名不能为空");的错误信息
+		xml校验
+			步骤
+				1、在页面上
+					<s:textfield name="username" label="用户名"></s:textfield>
+    					<s:textfield name="password" label="密码"></s:textfield>
+    					<s:fielderror fieldName="username"></s:fielderror>
+					
+					说明：
+						<s:fielderror fieldName="username"></s:fielderror>
+						在这里fileldName="username"会把后台username的报错信息显示到前台
+						<s:fielderror></s:fielderror>
+						把所有的字段的错误信息显示到前台的页面中
+				2、编写xml文件
+					xml文件的名称的命名规则为：
+						<ActionClassName>-<aliasName_methodName>-validation.xml
+						其中alias为配置文件中action元素name属性的值
+					例如：
+						1、在com.itheima.struts2.validate.action包中写了一个类ValidateAction
+						2、在配置文件中作为如下的配置
+							<action name="validateAction_*" method="{1}" class="cn.itheima03.struts2.validate.action.ValidateAction">
+								<result name="success">validate/success.jsp</result>
+								<result name="input">validate/validate.jsp</result>
+							</action>
+						3、在该类的相同路径下，写一个xml文件
+							ValidateAction-validateAction_testXMLValidate-validation.xml
+						   该xml文件和类在同一个路径下
+						4、在该xml文件中，就可以进行属性的校验了
+							<validators>
+								//要验证的属性，和页面上name的属性的值对应
+								<field name="username">
+									//type为校验器，是struts2内置的
+									<field-validator type="requiredstring">
+										<param name="trim">true</param>
+										//如果验证不成功，则输出的内容
+										<message><![CDATA[用户名不能为空]]></message>
+									</field-validator>
+								</field>
+								<field name="password">
+									<field-validator type="requiredstring">
+										<param name="trim">true</param>
+										<message><![CDATA[密码不能为空]]></message>
+									</field-validator>
+									//正则表达式验证
+									<field-validator type="regex">
+										<param name="trim">true</param>
+										<param name="expression"><![CDATA[^[a-zA-Z0-9]{6,12}$]]></param>
+										<message><![CDATA[密码长度应该在6到12之间]]></message>
+									</field-validator>
+								</field>
+							</validators>
+				3、在struts2的配置文件中
+					input所指向的页面就是验证不成功，输出的验证信息的页面
+					<result name="input">validate/validate.jsp</result>
+9、防止表单重复提交
+	1、原理
+		利用了struts2内置的拦截器token实现的
+		<interceptor name="token" class="org.apache.struts2.interceptor.TokenInterceptor"/>
+	2、步骤
+		1、在要提交的表单页面上，要写一个struts2自定义的标签：
+			<s:form action="../tokenAction_token.action">
+				<s:token></s:token>//生成一大堆字符串，用于往session中存放
+					用户名:<s:textfield name="username"></s:textfield>	
+					密码:<s:password name="password"></s:password>
+				<s:submit></s:submit>
+  			</s:form>
+		2、在配置文件中，由于在defaultStack中没有把token包括进来，所以
+			<interceptors>
+				<interceptor-stack name="tokenInterceptor">
+					<interceptor-ref name="token">
+						//哪些方法可以防止重复提交，如果有很多方法，则用,隔开
+						<param name="includeMethods">token</param>
+					</interceptor-ref>
+					<interceptor-ref name="defaultStack"></interceptor-ref>
+				</interceptor-stack>
+			</interceptors>
+			<default-interceptor-ref name="tokenInterceptor"></default-interceptor-ref>
+			说明：
+				1、上面的配置新定义了一个拦截器栈
+				2、在拦截器栈中把默认的拦截器栈加了进来
+					<interceptor-ref name="defaultStack"></interceptor-ref>
+				3、在这个拦截器栈中把token也加了进来，并且指明了哪些方法需要用到防止重复提交
+					<interceptor-ref name="token">
+						//哪些方法可以防止重复提交，如果有很多方法，则用,隔开
+						<param name="includeMethods">token</param>
+					</interceptor-ref>
+				4、把新定义的拦截器栈tokenInterceptor成了默认的拦截器栈
+		3、如果表单重复提交了，将指向invalid.token的错误页面
+			<result name="invalid.token">token/error.jsp</result>
+		4、如果只执行了上述的内容，报错信息将是一个英文信息， 变成中文信息，步骤如下：
+			1、 在struts2的配置文件中，加入自定义资源文件的配置
+				<constant name="struts.custom.i18n.resources" value="com.itheima.struts2.resource.token"></constant>
+			    说明：引入了一个资源文件：为com/itheima/struts2/resource/token.properties
+			2、在该资源文件中
+				struts.messages.invalid.token=\u4E0D\u80FD\u91CD\u590D\u63D0\u4EA4\u8868\u5355
+			    说明：key值保持不变，value是输出的错误信息
+10、文件的上传
+	1、原理：
+		在struts2中，利用拦截器fileUpload实现了文件上传
+	2、实现步骤
+		1、在页面上
+			<s:form action="uploadAction_upload.action" enctype="multipart/form-data">
+				<s:file name="resource"></s:file>
+				<s:submit></s:submit>
+			</s:form>
+		   说明：enctype="multipart/form-data"是必须的，说明要上传的文件是以二进制流的形式传递的
+		2、在文件上传的action中，要有一个属性resource,属性的类型为File
+		    public class UploadFileAction{
+			private File resource;
+			//set和get方法
+		    }
+		3、写一个帮助类，可以把resource文件上传到服务器上的某一个地方
+		4、详情：
+			1、可以控制文件上传的大小
+				1、在default.properties文件中，有这样一个配置
+					struts.multipart.maxSize=2097152
+				   说明文件上传的默认的最大的值为2M
+				2、如果要改变其默认值，在配置文件中，设置如下的配置
+					<constant name="struts.multipart.maxSize" value="8097152"></constant>
+					把文件上传的最大值改为8M
+			2、可以控制文件的类型和扩展名
+				1、在action中，可以显示文件的类型和扩展名
+					1、在action中可以设置如下的属性
+						resourceContentType   该属性的名称的组成为{name}ContentType
+					2、在action中可以设置如下的属性
+						resourceFileName       该属性的名称的组成为{name}FileName
+				2、在配置文件中
+					引入拦截器fileUpload
+					<interceptor-ref name="defaultStack">
+						<!-- 
+							允许上传的文件的最大size
+						 -->
+						<param name="fileUpload.maximumSize">8097152</param>
+						<!-- 
+							允许上传文件的扩展名
+						 -->
+						<param name="fileUpload.allowedExtensions">txt,doc,pdf,jpg</param>
+						<!-- 
+							允许上传文件的类型
+						 -->
+						<param name="fileUpload.allowedTypes">application/msword</param>
+					</interceptor-ref>
+				   说明：
+					1、因为拦截器在默认的栈中，所以只需要引入默认的栈就可以了
+					2、在这里可以通过param给默认栈的fileUpload拦截器的属性赋值
+					   所以maximumSize,allowedExtensions,allowedTypes都是拦截器fileUpload的属性
+			3、如果大小、后缀名、扩展名不符合要求，则会报错，系统会跳转到input指向的页面
+				<result name="input">error.jsp</result>，在error.jsp中编写<s:fielderror></s:fielderror>，就可以看到错误信息
+			   但是，报错的信息是英文的信息，如上传的时候类型错误的信息：
+				Content-Type not allowed: upload "xwork-2.1.6-src.zip" "upload_6fff0830_13174e12471__8000_00000000.tmp" application/x-zip-compressed
+				该信息的组成(org.apache.struts2)：struts-messages.properties
+					struts.messages.error.file.too.large=File too large: {0} "{1}" "{2}" {3}
+					struts.messages.error.content.type.not.allowed=Content-Type not allowed: {0} "{1}" "{2}" {3}
+					struts.messages.error.file.extension.not.allowed=File extension not allowed: {0} "{1}" "{2}" {3}
+				{0}：代表页面上<input name="upload" type="file"/>中的name的值
+				{1}：代表文件上传的名称
+				{2}：文件保存在临时目录的名称。临时目录为work\Catalina\localhost\struts2
+				{3}：代表文件上传类型，或者文件上传大小。上面的错误代表文件上传类型。如果报第一个错误，则代表文件上传大小。
+			   怎么样变成中文的信息呢？
+				步骤：
+					1、	建立一个properties文件。这个文件的名称可以任意取。
+					2、	在这个配置文件中，添入如下的内容：
+						struts.messages.error.file.too.large=文件超过了规定的大小: {0} "{1}" "{2}" {3}
+						struts.messages.error.content.type.not.allowed=该类型不允许被上传: {0} "{1}" "{2}" {3}
+						struts.messages.error.file.extension.not.allowed=不能上传该扩展名类型的文件: {0} "{1}" "{2}" {3}
+					3、	在struts-upload.xml中，指定配置文件的位置
+						<constant name="struts.custom.i18n.resources" value="com.itheima.struts2.action.upload.fileuploadmessage"></constant>
+						如果配置文件放在src下，则这样指定:
+						<constant name="struts.custom.i18n.resources" value="fileuploadmessage"></constant>
+11、类型转化
+	1、应用场景
+		在实际的开发中有可能存在这样的情况，例如：在页面上选择自己的爱好，是一个多选，在action中获取选择的爱好，而获取选择爱好的属性为List,
+		一般情况下，页面表单的元素在后台用list是获取不到值的，这个时候需要类型转化
+	2、步骤
+		1、在页面上
+			<s:form action="../converterAction_aihaoss.action">
+				<s:checkboxlist list="{'aa','bb','cc','dd'}" name="aihaos"></s:checkboxlist>
+				<s:submit></s:submit>
+			</s:form>
+		2、在action中,用List接受数据
+			public class ConverterAction extends ActionSupport{
+				private List<String> aihaos;
+			}
+		3、建立一个转化器类ListConverter
+			//把页面上的选择的内容填充到List<String>中
+			public Object convertFromString(Map context, String[] values, Class toClass) {
+				List<String> aihaos = new ArrayList<String>();
+				for(String s:values){
+					aihaos.add(s);
+				}
+				return aihaos;
+			}
+		4、建立一个配置文件xwork-conversion.properties，该配置文件放在src下
+			java.util.List=cn.itheima03.struts2.converter.action.ListConverter
+		      key值为转化后的类型，value值为转化器
+				

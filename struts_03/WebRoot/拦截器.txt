@@ -1,0 +1,70 @@
+拦截器的目的：
+    	如果在一个业务逻辑方法中设计到的逻辑相当复杂，可以把这些业务分离开：
+    	   例如：保存用户
+    	        1、启动日志
+    	        2、检查权限
+    	        3、文件的上传
+    	        4、保存用户
+    	      如果用传统的方法做，以上4点都在同一个方法中，这样耦合性很强
+    	      
+    	   目标：
+    	      把这四方面的内容分开，完全松耦合
+    	      
+步骤：
+    1、准备页面：
+          	在页面中准备一个文本框,该文本框在一个表单中
+    2、准备action
+                              在action中有一个方法：saveUser
+                              在action中准备一个属性，该属性是为了获取文本框的值
+                              在saveUser中做如下的工作：
+                 	对该属性的值进行判断，如果值为"admin",输出"save user"
+                 	                                         如果值不为"admin",输出"没有权限进行访问"
+                 	                                         
+用拦截器实现的步骤：
+    1、准备页面
+    2、准备action
+        public class InterceptorAction extends ActionSupport{
+			public String saveUser(){
+				ActionContext.getContext().put("message", "save user");
+				return "privilege";
+			}
+		}
+		说明：该action的saveUser方法和权限没有任何联系
+    3、创建一个拦截器
+         public class PrivilegeInterceptor implements Interceptor{
+         	@Override
+			public String intercept(ActionInvocation arg0) throws Exception {
+				/**
+				 * 接受页面的参数进行判断
+				 */
+				String username = ServletActionContext.getRequest().getParameter("username");
+				if("admin".equals(username)){
+					return arg0.invoke();
+				}else{
+					ActionContext.getContext().put("message", "权限不足,没有办法访问");
+					return "privilege";
+				}
+			}
+         }
+      4、配置
+      		<interceptors>
+				<!-- 
+					声明一个拦截器
+				 -->
+				<interceptor name="privilege" class="cn.itcast.sh08.struts2.interceptor.PrivilegeInterceptor"></interceptor>
+				<!-- 
+					声明了一个拦截器栈
+				 -->
+				<interceptor-stack name="privilegeStack">
+					<!-- 
+						引用默认的拦截器栈
+					 -->
+					<interceptor-ref name="defaultStack"></interceptor-ref>
+					<!-- 
+						引用自己创建的拦截器
+					 -->
+					<interceptor-ref name="privilege"></interceptor-ref>
+				</interceptor-stack>
+			</interceptors>
+			<default-interceptor-ref name="privilegeStack"></default-interceptor-ref>
+           

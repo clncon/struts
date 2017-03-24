@@ -1,0 +1,31 @@
+1、获取valueStack的三种方式
+    ValueStack valueStack = ActionContext.getContext().getValueStack();
+	ValueStack valueStack2 = ServletActionContext.getContext().getValueStack();
+	ValueStack valueStack3 = (ValueStack)ServletActionContext.getRequest().getAttribute("struts.valueStack");
+2、valueStack的生命周期是一次请求
+3、valueStack的内存结构：
+     root:对象栈
+     context:OgnlContext
+          _root:对象栈
+          _values:map栈
+4、对象栈的操作
+    1、把数据放入到对象栈中
+    	valueStack.push  放入到对象栈的栈顶
+    	valueStack.getRoot().add("aaaa");  放入到了对象栈的栈底
+    	ActionContext.getContext().getValueStack().set("aaa", "asfd");  把一个map放入到了对象栈的栈顶
+    	valueStack.getRoot().add(0,"aaaa"); 放入到了对象栈的栈顶
+    2、从对象栈中把数据提取出来
+    	ActionContext.getContext().getValueStack().getRoot().get(0);
+    	ActionContext.getContext().getValueStack().peek();
+    	   获取对象栈的栈顶的元素
+    3、移除栈顶元素
+         ActionContext.getContext().getValueStack().getRoot().remove(0);
+         ActionContext.getContext().getValueStack().pop();
+5、map栈的操作
+    1、可以把一个对象放入到map栈中的reuqest域中
+    	ServletActionContext.getRequest().setAttribute("aaa", "aaa");
+    2、可以把一个对象放入到map栈的application域中
+        ServletActionContext.getServletContext().setAttribute("aaaa", "aaaa");
+    3、可以把一个对象放入到map栈中
+    	ActionContext.getContext().put("aaa", "aaaa");
+     

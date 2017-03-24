@@ -1,0 +1,23 @@
+属性驱动：
+    1、创建一个javabean,javabean中的属性和页面中表单中的name属性的内容保持一致
+    2、在action里实现一个接口ModelDriven<Person>
+    3、在action中声明一个属性，并且创建该属性的对象
+    	private Person modle = new Person();
+    4、在action中有一个方法：
+    	@Override
+		public Person getModel() {
+			// TODO Auto-generated method stub
+			return this.modle;
+		}
+		该方法返回模型驱动对象
+		
+模型驱动的原理:
+    模型驱动经过两个拦截器:
+      1、ModelDrivenInterceptor
+          1、得到action
+          2、由action强制转化成ModelDriver
+          3、由ModelDriver.getModel()获取模型对象
+          4、把模型对象放入到栈顶
+      2、ParameterInterceptor
+          	把form表单的数据封装到相应的对象栈中的属性中
+	    	

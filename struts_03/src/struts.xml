@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+  <constant name="struts.devMode" value="true"></constant>
+  <constant name="struts.ui.theme" value="simple"></constant>
+    <!--  <include file="struts-ui.xml"></include>-->
+<!--      <include file="struts-Interceptor.xml"></include>-->
+    <!-- <include file="struts-propertyDriver.xml"></include> -->
+<!--     <include file="struts-modelDriver.xml"></include> -->
+    <include file="struts-validate.xml"></include>
+</struts>

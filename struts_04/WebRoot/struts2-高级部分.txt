@@ -1,0 +1,74 @@
+1、struts2的错误处理
+	1、java的错误处理
+		如果方法有异常，两种解决方案
+			try
+			抛出异常
+	2、UserAction(saveUser throws Exception)--->DefaultActionInvocation(invoke)--->DefaultActionProxy(execute)
+	   ---->Dispatcher(serviceAction)
+	3、在serviceAction方法中：
+		if (devMode) {
+			catch (ConfigurationException e) {
+				// WW-2874 Only log error if in devMode
+				if(devMode) {
+					LOG.error("Could not find action or result", e);
+				}
+				else {
+					LOG.warn("Could not find action or result", e);
+				}
+			    sendError(request, response, context, HttpServletResponse.SC_NOT_FOUND, e);
+			} catch (Exception e) {
+			    sendError(request, response, context, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+			} finally {
+			    UtilTimerStack.pop(timerKey);
+			}
+		}
+		如果devMode为true(<constant name="struts.devMode" value="true"/>)
+			如果抛出的异常是ConfigurationException或者及子类，第一个catch就可以捕捉到，如果是其他的异常类，第二个catch可以捕获到，
+			从上述的代码可以看出：struts2处理异常的方法为sendError方法
+
+			在sendError方法中准备了一个模板页面：/org/apache/struts2/dispatcher/error.ftl
+			    需要把错误信息的值填充到里面
+		如果devMode为false,不会跳转到错误模板页面
+
+        4、全局的错误处理
+		在struts2的配置文件中：
+			<global-results>
+			<result name="errHandler" type="chain">
+				<param name="actionName">errorProcessor</param>
+			</result>
+			</global-results>
+			<global-exception-mappings>
+				<exception-mapping exception="java.lang.Exception"
+					result="errHandler" />
+			</global-exception-mappings>
+
+			<action name="errorProcessor" class="com.itheima03.oa.exception.ErrorPrcessor">
+				<result>error.jsp</result>
+			</action>
+		说明：
+			1、所有的action请求都会执行默认的拦截器栈defaultStack,而在默认的拦截器栈中有一个拦截器为exception
+			2、当执行action的时候，该拦截器会执行两次
+			3、在该exception拦截器中
+				try {
+				    //执行拦截器或者action
+				    result = invocation.invoke();
+				} catch (Exception e) {//捕获异常
+				    if (isLogEnabled()) {
+					handleLogging(e);
+				    }
+				    //把global-exception-mappings的值获取到了
+				    List<ExceptionMappingConfig> exceptionMappings = invocation.getProxy().getConfig().getExceptionMappings();
+				    //获取到exception-mapping中的result属性
+				    String mappedResult = this.findResultFromExceptions(exceptionMappings, e);
+				    if (mappedResult != null) {
+					result = mappedResult;
+					//把捕获到的错误的信息存放在栈顶
+					publishException(invocation, new ExceptionHolder(e));
+				    } else {
+					throw e;
+				    }
+				}
+
+				return result;//代表的是error.jsp
+			4、在error.jsp中可以输出栈顶元素的值即报错信息
+	5、struts2的错误处理在整个过程中没有添加错误的状态码
